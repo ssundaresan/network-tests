@@ -68,8 +68,14 @@ public class NetworkTest{
 		try {
 			channel.write(end);
 			buf = ByteBuffer.allocate(1500);
-			channel.read(buf);
-			System.out.print(new String(buf.array())+"\n");
+			int rOut = channel.read(buf);
+			while (rOut == 0)
+				rOut = channel.read(buf);
+			if(rOut > 0)
+				System.out.print(new String(buf.array())+"\n");
+			else
+				return -1;
+
 		} catch (IOException e) {
 			e.printStackTrace();
 			return -1;
