@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -16,11 +17,11 @@ import java.util.Collections;
 public class NetworkTest{
 	private long nanosInSec = 1000000000;
 	public int cbrTest(
-						String server,
-						int port,
-						int pps,
-						int pktLen,
-						int duration){
+				String server,
+				int port,
+				int pps,
+				int pktLen,
+				int duration){
 		Charset charset = Charset.forName("UTF-8");
 		CharsetEncoder encoder = charset.newEncoder();
 		ByteBuffer start;
@@ -77,9 +78,9 @@ public class NetworkTest{
 	}
 
 	public int pingTest(
-						String server,
-						int port,
-						int cnt){
+				String server,
+				int port,
+				int cnt){
 		Charset charset = Charset.forName("UTF-8");
 		CharsetEncoder encoder = charset.newEncoder();
 		ByteBuffer sbuf = null;
@@ -111,7 +112,7 @@ public class NetworkTest{
 					rtt = System.nanoTime() - startTime;
 					//System.out.print("rtt " + rtt + "\n");
 				}
-				Thread.sleep(100);
+				Thread.sleep(10);
 				if (i > 0){
 					outArr.add(rtt);
 					sum += rtt;
@@ -124,7 +125,7 @@ public class NetworkTest{
 		Collections.sort(outArr);
 		int len = outArr.size();
 		double avg = (1.0d * sum)/len;
-		System.out.print("avg:" + avg + " " + "median:" + outArr.get(len/2)); 
+		System.out.print("avg:" + avg + " " + "median:" + outArr.get(len/2)+"\n"); 
 		return 0;
 	}
 
@@ -149,4 +150,33 @@ public class NetworkTest{
 		}
 		return channel;
 	}
+	public int tcpConnTest(
+				String server,
+				int port,
+				int cnt){
+		ArrayList<Long> outArr = new ArrayList<Long>();
+		long sum = 0;
+		long startTime;
+		long rtt;
+		for(int i=0;i<cnt;i++){
+			try {
+				Socket s = new Socket();
+				startTime = System.nanoTime();
+				s.connect(new InetSocketAddress(server, port),2000);
+				rtt = System.nanoTime() - startTime;
+				s.close();
+				outArr.add(rtt);
+				sum += rtt;
+				Thread.sleep(10);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		Collections.sort(outArr);
+		int len = outArr.size();
+		double avg = (1.0d * sum)/len;
+		System.out.print("avg:" + avg + " " + "median:" + outArr.get(len/2)+"\n");
+		return 1;
+	}
+	
 }
